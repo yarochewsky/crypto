@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "number.h"
 
+
+
 int32_t convert_base(int32_t target, uint8_t base_old, uint8_t base, 
                      uint32_t** result) {
     if (target < 0 || base < 2) return -1;

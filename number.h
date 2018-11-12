@@ -4,6 +4,46 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#define BIT_LENGTH 64
+
+/**
+ * bigint - definition of a multi-precision
+ *          integer, as an array of integers
+ *          of length predefined (above)
+*/
+typedef bigint uint32_t[BIT_LENGTH];
+
+/**
+ * big_init - initializes a number
+ * @x : number to be initialized
+*/
+void big_init(bigint* x);
+
+/**
+ * big_free - free resources associated with a number
+ * @x : number for which resources will be freed
+*/
+void big_free(bigint* x);
+
+/**
+ * big_copy - replaces the value of a number with that of another
+ * @dst : copy destination
+ * @src : copy source
+*/
+void big_copy(bigint* dst, const bigint* src);
+
+/**
+ * big_bitlen - returns the smallest number of bits necessary to represent x
+ * @x : number to be represented
+*/
+uint32_t big_bitlen(const bigint* x);
+
+/**
+ * big_size - returns the total size of the number in bytes
+ * @x : number for which size is to be returned
+*/
+uint32_t big_size(const bigint* x);
+
 /**
  * convert_base - converts a number to the new base
  * @target : number to be converted
