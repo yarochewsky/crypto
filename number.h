@@ -11,7 +11,7 @@
  *          integer, as an array of integers
  *          of length predefined (above)
 */
-typedef bigint uint32_t[BIT_LENGTH];
+typedef uint32_t bigint[BIT_LENGTH];
 
 /**
  * big_init - initializes a number
