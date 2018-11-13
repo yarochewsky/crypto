@@ -1,2 +1,3 @@
-# crypto
+# cryptolib
+
 Cryptography Library in C
