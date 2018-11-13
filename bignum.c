@@ -118,6 +118,35 @@ bignum* bignum_subtraction(const bignum* x, const bignum* y) {
     return result;
 }
 
+bignum* bignum_multiplication(const bignum* x, const bignum* y) {
+    if (x->base != y->base) return NULL;
+    bignum* result = (bignum*) malloc(sizeof(bignum));
+    if (!result) return NULL;
+    // we will use the size of x and y extensively
+    uint32_t size_x = bignum_size(x);
+    uint32_t size_y = bignum_size(y);
+    // the result is at most size_x + size_y + 2
+    // but we will update later as needed
+    uint32_t len = size_x + size_y + 2;
+    bignum_init(result, len, x->base);
+    uint32_t carry, uv;
+    for (uint32_t i = 0; i < size_y; i++) {
+        carry = 0;
+        uv = 0;
+        for (uint32_t j = 0; j < size_y; j++) {
+            uv = result->limbs[i + j] + x->limbs[j] * y->limbs[i] + carry;
+            // if uv is a number in the base b, then we extract u and v as such
+            // u = uv / b and v = uv % b
+            result->limbs[i + j] = uv % x->base;
+            carry = uv / x->base;
+        }
+        result->limbs[i + size_x + 1] = uv / x->base;
+    }
+    // update size as promised
+    result->size = bignum_minimize_size(result);
+    return result;
+}
+
 int32_t convert_base(int32_t target, uint8_t base_old, uint8_t base, 
                      uint32_t** result) {
     if (target < 0 || base < 2) return -1;

@@ -12,8 +12,14 @@
  *          integer, as an array of integers
  *          of length predefined (above), a sign/size integer
  *          (negative sizes represent a negative bignum),
- *          and a base. Note: we store LSB at index 0 and count
+ *          and a base. 
+ * Notes: 
+ *          (a) we store LSB at index 0 and count
  *          from right to left (MSB at size - 1)
+ *          (b) we guarantee to calculate and store
+ *          the minimum number of digits required
+ *          to represent a number in the field size
+ *          i.e. no leading zeroes
 */
 typedef struct {
     int32_t size;
@@ -78,7 +84,7 @@ bignum* bignum_subtraction(const bignum* x, const bignum* y);
  * bignum_multiplication - computes multiplication of two numbers
  * @x : first number to be multiplied 
  * @y : second number to be multiplied 
- * Returns multiplication result
+ * Returns multiplication result, or NULL on failure
 */
 bignum* bignum_multiplication(const bignum* x, const bignum* y);
 
@@ -88,9 +94,10 @@ bignum* bignum_multiplication(const bignum* x, const bignum* y);
  * @dv : divisor 
  * @q : quotient as output parameter
  * @r : remainder as output parameter
- * Stores the quotient and remainder in the output parameters
+ * Stores the quotient and remainder in the output parameters.
+ * Returns 1 on success, or 0 on failure
 */
-void bignum_division(const bignum* de, const bignum* dv, bignum* q, bignum* r);
+uint8_t bignum_division(const bignum* de, const bignum* dv, bignum* q, bignum* r);
 
 /**
  * convert_base - converts a number to the new base
