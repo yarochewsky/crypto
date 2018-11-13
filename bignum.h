@@ -10,11 +10,10 @@
 /**
  * bignum - definition of a multi-precision
  *          integer, as an array of integers
- *          of length predefined (above)
- *          a sign/size integer
- *          (negative sizes represent a negative
- *           bignum),
- *          and a base
+ *          of length predefined (above), a sign/size integer
+ *          (negative sizes represent a negative bignum),
+ *          and a base. Note: we store LSB at index 0 and count
+ *          from right to left (MSB at size - 1)
 */
 typedef struct {
     int32_t size;
@@ -58,6 +57,40 @@ uint8_t bignum_negative(const bignum* x);
  * @x : number for which size is to be determined
 */
 uint32_t bignum_size(const bignum* x);
+
+/**
+ * bignum_addition - computes addition of two numbers
+ * @x : first number to be added
+ * @y : second number to be added
+ * Returns addition result, or NULL on failure
+*/
+bignum* bignum_addition(const bignum* x, const bignum* y);
+
+/**
+ * bignum_subtraction - computes subtraction of two numbers
+ * @x : number to be subtracted from
+ * @y : number to subtract
+ * Returns subtraction result, or NULL on failure
+*/
+bignum* bignum_subtraction(const bignum* x, const bignum* y);
+
+/**
+ * bignum_multiplication - computes multiplication of two numbers
+ * @x : first number to be multiplied 
+ * @y : second number to be multiplied 
+ * Returns multiplication result
+*/
+bignum* bignum_multiplication(const bignum* x, const bignum* y);
+
+/**
+ * bignum_division - computes division of two numbers
+ * @de : dividend
+ * @dv : divisor 
+ * @q : quotient as output parameter
+ * @r : remainder as output parameter
+ * Stores the quotient and remainder in the output parameters
+*/
+void bignum_division(const bignum* de, const bignum* dv, bignum* q, bignum* r);
 
 /**
  * convert_base - converts a number to the new base
