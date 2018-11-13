@@ -2,6 +2,27 @@
 #include <stdlib.h>
 #include "number.h"
 
+uint32_t big_size(const bigint* x) {
+    const bigint* ref = x;
+    uint32_t size = 0;
+    while (ref) {
+        size++; 
+        ref++;
+    }
+    return size * sizeof(*(x));
+}
+
+void big_copy(bigint* dst, const bigint* src) {
+    uint32_t size = big_size(src);
+    for (uint32_t i = 0; i < size / sizeof(*(src)); i++) {
+        *(*dst + i) = *(*src + i); 
+    }
+}
+
+void big_free(bigint* x) {
+    free(x);
+}
+
 int32_t convert_base(int32_t target, uint8_t base_old, uint8_t base, 
                      uint32_t** result) {
     if (target < 0 || base < 2) return -1;
