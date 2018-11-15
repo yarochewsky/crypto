@@ -28,15 +28,17 @@ typedef struct {
 } bignum;
 
 /**
- * bignum_init - initializes a number with a size, base
+ * bignum_init - Allocate resources to store a bignum given its size, 
+ *               and initializes it with the size, base
  *               and populates limbs to 0. Pass in a negative
  *               size to get a negative number
- * @x : number to be initialized
+ *               
  * @size : desired size of number
  * @base : base to be used for the number
- * Returns 1 on success or 0 on failure
+ * Returns the allocated and initialized number on success, or
+ * NULL on failure
 */
-uint8_t bignum_init(bignum* x, int32_t size, uint32_t base);
+bignum* bignum_init(int32_t size, uint32_t base);
 
 /**
  * bignum_free - free resources associated with a number

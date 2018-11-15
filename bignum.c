@@ -24,16 +24,22 @@ static int32_t bignum_util_subtraction(const bignum* x, const bignum* y,
  * Returns the minimum number of bits
 */
 static uint32_t bignum_minimize_size(const bignum* x);
+
  
-uint8_t bignum_init(bignum* x, int32_t size, uint32_t base) {
+bignum* bignum_init(int32_t size, uint32_t base) {
+    bignum* x = (bignum*) malloc(sizeof(bignum));
+    if (!x) return NULL;
     x->size = size;
     x->limbs = (uint32_t*) malloc(ABS(size) * LIMB_SIZE);
-    if (!x->limbs) return 0;
+    if (!x->limbs) {
+        free(x);
+        return NULL;
+    }
     for (uint32_t i = 0; i < ABS(size); i++) {
         *(x->limbs) = 0;
     }
     x->base = base;
-    return 1;
+    return x;
 }
 
 void bignum_free(bignum* x) {
@@ -61,12 +67,11 @@ bignum* bignum_addition(const bignum* x, const bignum* y) {
     if (x->base != y->base) return NULL;
     uint8_t carry = 0;
     // allocate resources for addition result
-    bignum* result = (bignum*) malloc(sizeof(bignum));
-    if (!result) return NULL;
     uint32_t len = MAX(bignum_size(x), bignum_size(y));
     // size is at most len + 1. Update later as needed
     // initialize resources for result
-    bignum_init(result, len + 1, x->base); 
+    bignum* result = bignum_init(len + 1, x->base); 
+    if (!result) return NULL;
     for (uint32_t i = 0; i < len; i++) {
         uint32_t operation = (x->limbs[i] + y->limbs[i] + carry);
         result->limbs[i] = operation % x->base;
@@ -86,25 +91,23 @@ bignum* bignum_addition(const bignum* x, const bignum* y) {
 
 bignum* bignum_subtraction(const bignum* x, const bignum* y) {
     if (x->base != y->base) return NULL;
-    bignum* result = (bignum*) malloc(sizeof(bignum));
-    if (!result) return NULL;
     uint32_t len = MAX(bignum_size(x), bignum_size(y));
-    bignum_init(result, len, x->base);
+    bignum* result = bignum_init(len, x->base);
+    if (!result) return NULL;
     int32_t carry = bignum_util_subtraction(x, y, result);
     if (carry < 0) {
         // re-run subtraction with x = 0 and y = result
-        bignum* x_0 = (bignum*) malloc(sizeof(bignum));
+        bignum* x_0 = bignum_init(len, x->base);
         if (!x_0) {
             free(result);
             return NULL;
         }
-        bignum* output = (bignum*) malloc(sizeof(bignum));
+        bignum* output = bignum_init(len, x->base);
         if (!output) {
             free(result);
             free(x_0);
             return NULL;
         }
-        bignum_init(x_0, len, x->base);
         bignum_util_subtraction(x_0, result, output);
         // update size and sign as well -> here we already
         // now that the number is negative, since the carry was negative
@@ -120,15 +123,15 @@ bignum* bignum_subtraction(const bignum* x, const bignum* y) {
 
 bignum* bignum_multiplication(const bignum* x, const bignum* y) {
     if (x->base != y->base) return NULL;
-    bignum* result = (bignum*) malloc(sizeof(bignum));
-    if (!result) return NULL;
     // we will use the size of x and y extensively
     uint32_t size_x = bignum_size(x);
     uint32_t size_y = bignum_size(y);
     // the result is at most size_x + size_y + 2
     // but we will update later as needed
     uint32_t len = size_x + size_y + 2;
-    bignum_init(result, len, x->base);
+    bignum* result = bignum_init(len, x->base);
+    if (!result) return NULL;
+
     uint32_t carry, uv;
     for (uint32_t i = 0; i < size_y; i++) {
         carry = 0;
@@ -145,6 +148,29 @@ bignum* bignum_multiplication(const bignum* x, const bignum* y) {
     // update size as promised
     result->size = bignum_minimize_size(result);
     return result;
+}
+
+uint8_t bignum_division(const bignum* de, const bignum* dv, bignum* q,
+                        bignum* r) {
+    // ensure same base
+    if (de->base != dv->base) return NULL;
+    // ensure size(de) >= size(dv) >= 1
+    uint32_t size_de = bignum_size(de);
+    uint32_t size_dv = bignum_size(dv);
+    if (sisze_db > size_de || size_dv < 1) {
+        return NULL;
+    }
+    // allocate q and r  
+    // Note size(q) = size(de), and size(r) = size(dv)
+    bignum* q = bignum_init(size_de, de->base);
+    if (!q) return NULL;
+    bignum* r = bignum_init(size_dv, de->base);
+    if (!r) return NULL;
+    
+    for (uint32_t j = 0; j < size_de - size_dv; j++) {
+        q->limbs[j] = 0;
+        // TODO
+    }
 }
 
 int32_t convert_base(int32_t target, uint8_t base_old, uint8_t base, 
